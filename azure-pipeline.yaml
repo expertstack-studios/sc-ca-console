@@ -1,0 +1,41 @@
+trigger:
+    branches:
+        include:
+            - main
+
+pool:
+    vmImage: "ubuntu-latest"
+
+variables:
+    AWS_REGION: "ap-southeast-2" # or whatever region your bucket is in
+
+stages:
+    - stage: DeployToS3
+      jobs:
+          - job: S3Upload
+            steps:
+                # Check AWS CLI version
+                - script: aws --version
+                  displayName: "Verify AWS CLI"
+
+                # Set AWS credentials from pipeline secrets
+                - script: |
+                      aws configure set aws_access_key_id $(AWS_ACCESS_KEY_ID)
+                      aws configure set aws_secret_access_key $(AWS_SECRET_ACCESS_KEY)
+                      aws configure set default.region $(AWS_REGION)
+                  displayName: "Configure AWS Credentials"
+
+                # Sync files to S3 bucket and set ACL for public read access
+                - script: |
+                      aws s3 sync ./dist s3://your-s3-bucket-name/ \
+                        --delete \
+                        --acl public-read
+                  displayName: "Upload Static Site to S3"
+
+                # (Optional) CloudFront Invalidation
+                - script: |
+                      aws cloudfront create-invalidation \
+                        --distribution-id YOUR_DISTRIBUTION_ID \
+                        --paths "/*"
+                  displayName: "Invalidate CloudFront Cache"
+                  condition: and(succeeded(), ne(variables['CLOUDFRONT_DISTRIBUTION_ID'], ''))

@@ -1,0 +1,18 @@
+/* Import TailwindCSS */
+@import "tailwindcss";
+
+/* Custom styles (if needed) */
+body {
+  /* @apply bg-gradient-to-br from-sky-900 via-black to-purple-900 text-white; */
+  @apply font-Poppins
+}
+
+
+@font-face {
+  font-family: Poppins;
+  src: url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+}
+
+@theme {
+  --font-Poppins: 'Poppins', sans-serif;
+}
